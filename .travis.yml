@@ -1,45 +1,34 @@
-# travis CI config
 sudo: required
 cache: false
 language: generic
 services:
-  - docker
+- docker
 env:
   global:
-    - something=1
+  - secure: T5zAK6nbyY6V3DbXIOerb314o40LyrYJf0YQA9U5aEigaJO5m6p/kDEv4kA/emhUit2i+/HjdXnOGImDlWlDEs0GHK1KaDBObs8qJspXnNe6qqANmZhnwx1tdROvZD+fnOtlH7j5vdlImZIwpL6/HL4UAyLjiWEu1OAk5d1XLlLSEhG6T/n7+95/82IkgRg2gfnWWHYheOYXQyVkVfbAfEOug3KN/apejClgndu0lP9iuBfpjGomKbqS5drzKWUctNxLVW6WXEBxofGO2j8907K05Eo1/5NPgjCAAXXAMLibRDn4EvmUGKqEBLRLGsEcHKwC4ZYpnKtJfOGu7hZno+hJB9TcP0BEMMu024ivmJ7+xgkPA/EluZtdTL5ZV5C6Fq2Sqy2WLMhzvXwadFOgtiZtXx5jK27Rza+wN+H4pC7eyrfKGyuef8DyjmsvBkTGPfiT2iwUPJoqbnlS/SR8oh86lW7oeDqBMxjODf7/IiWj46Ro4l7SkRNP5gmuhpUItMuv3dKYcdhwQRstLn5MOcgGub3TZcyRAQo87yMWx27UvI+PN2YgPWAt5ssb9BP2MgHe0N9gK2PNnIZ2Gk6CPxXaUhXs50FbZjTPW56asEvbYLWH7vXPnLmQMTsErAuLP878sKDXr01VzUuASPjcSQrMzTBoO2CM9SdpCh0/WAw=
+  - secure: Z/E9Ls1YWC9ujaJrgu0DM2AwRuCpy4s6CaTjguTpSM1A2FHXVzXvdGnwA4rl3jbogwMPz9ndPsk57D2eRc2qGHkbKzN0T3VbwgRz0tWII1mfyHvMIMSV2GFp/V547s37UsWMD86UHbZZulwXwlZUaV1t8jlstrp0nnSRer3jFC6LzcHlgRPZLzuTtiRMI+wx7pJZ02/a0SSpmODkVfy1yW2g84gCR1JvZ7yYsYwc5EndaKHTtW3B7QUjYPUX1FJPa6rZikMaDg3jDMEyVWOAiFiOmXSvuQ3/PTesYX7E39GXOK4zhcTfO2H4okiSMaa6EI8czxfjBFH8uR6ubTPK6y5Vr41AJZQo+LBPTI1W3ZAgyk5F2OLBOjyXzlTzxj1aAoU0Zn33Vn+d/Ym3EnoGlGhDyjXtHbPFobVgeNiRmMVmDI+9NTJkTZrW6WpRVE1gXs2DAfTriUSWMDdOuqdshTuORk3UGbXQTOZDY7HNFv3KcO1hHmhwoE/Z6ySK/emwojZ5/8w5t3S2/OmpDRiYCe7CGRAiURnOLoG4u+725DQECXEVKsKtksnVX7cTK5zikkEV+WyLkwm2Pvi0eexofJlzG9fSEvBmZEBytjjQzmQ4v91H94q2sTFucSqVseb5fLGsdn3vKT2ehF/H0D08W2PM8O71FONQau8/uKAPRrM=
   matrix:
-    - IMAGE_NAME=test-builds:python_2.7
-    - IMAGE_NAME=test-builds:python_3.5
-    - IMAGE_NAME=test-builds:python_3.6
-    - IMAGE_NAME=test-builds:pypy_2
-    - IMAGE_NAME=test-builds:pypy_3
-    - IMAGE_NAME=test-builds:anaconda_2
-    - IMAGE_NAME=test-builds:anaconda_3
+  - IMAGE_NAME=test-builds:python_2.7
+  - IMAGE_NAME=test-builds:python_3.5
+  - IMAGE_NAME=test-builds:python_3.6
+  - IMAGE_NAME=test-builds:pypy_2
+  - IMAGE_NAME=test-builds:pypy_3
+  - IMAGE_NAME=test-builds:anaconda_2
+  - IMAGE_NAME=test-builds:anaconda_3
 before_install:
-  - echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-  - docker pull ${DOCKERHUB_USERNAME}/${IMAGE_NAME}
-  # (1) We are mounting the current directory onto the
-  #     docker container and giving it a mount location with
-  #     an identical name, which avoids issues with file
-  #     paths in coverage reports.
-  # (2) We are starting a container in detached mode that
-  #     runs a semi-infinite sleep call. This allows us to
-  #     run separate docker exec commands that keep the state
-  #     of the container between calls.
-  - export DOC_ID=`docker run -d -v $(pwd):$(pwd) -w $(pwd) ${IMAGE_NAME} sleep 10000000000`
-  # used by codecov when uploading the coverage report
-  - export CI_ENV=`bash <(curl -s https://codecov.io/env)`
-  # commands prefixed by ${DOC} will execute inside the
-  # running docker container
-  - export DOC_="docker exec ${CI_ENV} -e IMAGE_NAME ${DOC_ID}"
+- echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+- docker pull ${DOCKERHUB_USERNAME}/${IMAGE_NAME}
+- export DOC_ID=`docker run -d -v $(pwd):$(pwd) -w $(pwd) ${IMAGE_NAME} sleep 10000000000`
+- export CI_ENV=`bash <(curl -s https://codecov.io/env)`
+- export DOC_="docker exec ${CI_ENV} -e IMAGE_NAME ${DOC_ID}"
 install:
-  - ${DOC} pip install -U pip setuptools wheel
-  - ${DOC} python --version
-  - ${DOC} pip --version
-  - ${DOC} pip install -r requirements.txt
-  - ${DOC} pip install codecov
+- "${DOC} pip install -U pip setuptools wheel"
+- "${DOC} python --version"
+- "${DOC} pip --version"
+- "${DOC} pip install -r requirements.txt"
+- "${DOC} pip install codecov"
 script:
-  - ${DOC} pytest -v --cov=tests
+- "${DOC} pytest -v --cov=tests"
 after_script:
-  - ${DOC} codecov --env IMAGE_NAME
-  - docker kill ${DOC_ID}
+- "${DOC} codecov --env IMAGE_NAME"
+- docker kill ${DOC_ID}
