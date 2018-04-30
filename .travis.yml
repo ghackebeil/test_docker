@@ -1,0 +1,45 @@
+# travis CI config
+sudo: required
+cache: false
+language: generic
+services:
+  - docker
+env:
+  global:
+    - something=1
+  matrix:
+    - IMAGE_NAME=test-builds:python_2.7
+    - IMAGE_NAME=test-builds:python_3.5
+    - IMAGE_NAME=test-builds:python_3.6
+    - IMAGE_NAME=test-builds:pypy_2
+    - IMAGE_NAME=test-builds:pypy_3
+    - IMAGE_NAME=test-builds:anaconda_2
+    - IMAGE_NAME=test-builds:anaconda_3
+before_install:
+  - echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+  - docker pull ${DOCKERHUB_USERNAME}/${IMAGE_NAME}
+  # (1) We are mounting the current directory onto the
+  #     docker container and giving it a mount location with
+  #     an identical name, which avoids issues with file
+  #     paths in coverage reports.
+  # (2) We are starting a container in detached mode that
+  #     runs a semi-infinite sleep call. This allows us to
+  #     run separate docker exec commands that keep the state
+  #     of the container between calls.
+  - export DOC_ID=`docker run -d -v $(pwd):$(pwd) -w $(pwd) ${IMAGE_NAME} sleep 10000000000`
+  # used by codecov when uploading the coverage report
+  - export CI_ENV=`bash <(curl -s https://codecov.io/env)`
+  # commands prefixed by ${DOC} will execute inside the
+  # running docker container
+  - export DOC_="docker exec ${CI_ENV} -e IMAGE_NAME ${DOC_ID}"
+install:
+  - ${DOC} pip install -U pip setuptools wheel
+  - ${DOC} python --version
+  - ${DOC} pip --version
+  - ${DOC} pip install -r requirements.txt
+  - ${DOC} pip install codecov
+script:
+  - ${DOC} pytest -v --cov=tests
+after_script:
+  - ${DOC} codecov --env IMAGE_NAME
+  - docker kill ${DOC_ID}
