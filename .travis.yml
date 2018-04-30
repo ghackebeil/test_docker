@@ -21,11 +21,11 @@ before_install:
   - export CI_ENV=`bash <(curl -s https://codecov.io/env)`
   - export DOC="docker exec ${CI_ENV} -e IMAGE_NAME ${DOC_ID}"
 install:
-  - ${DOC} bash -c 'echo "$GLPK_VERSION"'
-  - ${DOC} bash -c 'echo "$IPOPT_VERSION"'
-  - ${DOC} bash -c 'echo "$CBC_VERSION"'
-  - ${DOC} bash -c 'echo "$BARON_VERSION"'
-  - ${DOC} bash -c 'echo "$GAMS_VERSION"'
+  - ${DOC} bash -c 'echo GLPK_VERSION="$GLPK_VERSION"'
+  - ${DOC} bash -c 'echo IPOPT_VERSION="$IPOPT_VERSION"'
+  - ${DOC} bash -c 'echo CBC_VERSION="$CBC_VERSION"'
+  - ${DOC} bash -c 'echo BARON_VERSION="$BARON_VERSION"'
+  - ${DOC} bash -c 'echo GAMS_VERSION="$GAMS_VERSION"'
   - ${DOC} pip install -U pip setuptools wheel
   - ${DOC} python --version
   - ${DOC} pip --version
