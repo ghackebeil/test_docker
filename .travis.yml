@@ -16,17 +16,22 @@ env:
   - IMAGE_NAME=test-builds:anaconda_2
   - IMAGE_NAME=test-builds:anaconda_3
 before_install:
-- echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-- docker pull ${DOCKERHUB_USERNAME}/${IMAGE_NAME}
-- export DOC_ID=`docker run -d -v $(pwd):$(pwd) -w $(pwd) ${DOCKERHUB_USERNAME}/${IMAGE_NAME} sleep 10000000000`
-- export CI_ENV=`bash <(curl -s https://codecov.io/env)`
-- export DOC="docker exec ${CI_ENV} -e IMAGE_NAME ${DOC_ID}"
+  - echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+  - docker pull ${DOCKERHUB_USERNAME}/${IMAGE_NAME}
+  - export DOC_ID=`docker run -d -v $(pwd):$(pwd) -w $(pwd) ${DOCKERHUB_USERNAME}/${IMAGE_NAME} sleep 10000000000`
+  - export CI_ENV=`bash <(curl -s https://codecov.io/env)`
+  - export DOC="docker exec ${CI_ENV} -e IMAGE_NAME ${DOC_ID}"
 install:
-- ${DOC} pip install -U pip setuptools wheel
-- ${DOC} python --version
-- ${DOC} pip --version
-- ${DOC} pip install -r requirements.txt
-- ${DOC} pip install codecov
+  - ${DOC} bash -c 'echo "$GLPK_VERSION"'
+  - ${DOC} bash -c 'echo "$IPOPT_VERSION"'
+  - ${DOC} bash -c 'echo "$CBC_VERSION"'
+  - ${DOC} bash -c 'echo "$BARON_VERSION"'
+  - ${DOC} bash -c 'echo "$GAMS_VERSION"'
+  - ${DOC} pip install -U pip setuptools wheel
+  - ${DOC} python --version
+  - ${DOC} pip --version
+  - ${DOC} pip install -r requirements.txt
+  - ${DOC} pip install codecov
 script:
 - ${DOC} pytest -v --cov=tests
 after_script:
