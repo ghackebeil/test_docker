@@ -20,7 +20,7 @@ before_install:
 - docker pull ${DOCKERHUB_USERNAME}/${IMAGE_NAME}
 - export DOC_ID=`docker run -d -v $(pwd):$(pwd) -w $(pwd) ${IMAGE_NAME} sleep 10000000000`
 - export CI_ENV=`bash <(curl -s https://codecov.io/env)`
-- export DOC_="docker exec ${CI_ENV} -e IMAGE_NAME ${DOC_ID}"
+- export DOC="docker exec ${CI_ENV} -e IMAGE_NAME ${DOC_ID}"
 install:
 - "${DOC} pip install -U pip setuptools wheel"
 - "${DOC} python --version"
